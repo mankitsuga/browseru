@@ -141,7 +141,7 @@
 
         function loadContent() {
 
-            fetch( "./content.json" )
+            fetch( "./current.json" )
                 .then( response => response.json() )
                 .then( items => {
                     items.forEach(item => {
