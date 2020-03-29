@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #111111;
+        }
+
+        #pagination {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #333333;
+            text-align: center;
+            padding: 5px 0;
+        }
+
+        #pagination button {
+            font-size: 18px;
+            margin: 0 10px;
+            text-align: center;
+            background: #555555;
+            color: #aaaaaa;
+            border: 0;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        #pagination .button {
+            height: 40px;
+            width: 40px;
+        }
+
+        #load {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 20px;
+            padding: 10px 20px;
+            background: #444444;
+            border: 0;
+            color: #999999;
+            font-weight: bolder;
+            font-size: 18px;
+            white-space: nowrap;
+            display: none;
+            z-index: 2;
+        }
+
+        #container {
+            text-align: center;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 50px;
+            left: 0;
+            overflow: auto;
+        }
+
+        #image {
+            padding: 10px;
+            max-width: 420px;
+            width: 100%;
+        }
+
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- THE LOAD BUTTON -->
+    <button id="load" onclick="loadContent()">
+        LOAD CONTENT
+    </button>
+    <!-- END LOAD BUTTON -->
+
+    <!-- THE IMAGE -->
+    <div id="container">
+        <img src="" id="image">
+    </div>
+    <!-- END IMAGE -->
+
+    <!-- THE PAGINATION -->
+    <div id="pagination">
+        <!-- THE FIRST PAGE -->
+        <button class="button" id="beginning" onclick="goToBeginning()">
+            <i class="fa fa-angle-double-left"></i>
+        </button>
+        <!-- END FIRST PAGE -->
+
+        <!-- THE PREV PAGE -->
+        <button class="button" id="prev" onclick="goToPrev()">
+            <i class="fa fa-angle-left"></i>
+        </button>
+        <!-- END PREV PAGE -->
+
+        <!-- THE PAGE NUMBER -->
+        <button id="pagenum">0</button>
+        <!-- END PAGE NUMBER -->
+
+        <!-- THE NEXT PAGE -->
+        <button class="button" id="next" onclick="goToNext()">
+            <i class="fa fa-angle-right"></i>
+        </button>
+        <!-- END NEXT PAGE -->
+
+        <!-- THE LAST PAGE -->
+        <button class="button" id="ending" onclick="goToEnding()">
+            <i class="fa fa-angle-double-right"></i>
+        </button>
+        <!-- END LAST PAGE -->
+    </div>
+    <!-- END PAGINATION -->
+
+    <!-- THE JAVASCRIPT -->
+    <script>
+
+        let image = document.getElementById( "image" );
+        let pageNum = document.getElementById( "pagenum" );
+
+        if( !localStorage.getItem( "loaded" ) ) {
+            document.getElementById( "load" ).style.display = "block";
+        } else {
+            image.setAttribute( "src", JSON.parse( localStorage.getItem( localStorage.getItem( "currentItem" ) ) ).url );
+            pageNum.innerText = localStorage.getItem( "currentItem" );
+        }
+
+        function loadContent() {
+
+            fetch( "/content.json" )
+                .then( response => response.json() )
+                .then( items => {
+                    items.forEach(item => {
+                        localStorage.setItem( item.id, JSON.stringify( item ) );
+                    });
+                } )
+                .then( () => {
+                    localStorage.setItem( "loaded", "true" );
+                    localStorage.setItem( "currentItem", "1" );
+                    pageNum.innerText = 1;
+                    document.getElementById( "load" ).style.display = "none";
+                    image.setAttribute( "src", JSON.parse( localStorage.getItem( localStorage.getItem( "currentItem" ) ) ).url );
+                } )
+                .catch( err => {
+                    if( err ) {
+                        console.log( err );
+                    }
+                } )
+        }
+
+        function goToBeginning() {
+
+            image.setAttribute( "src", JSON.parse( localStorage.getItem( "1" ) ).url );
+            localStorage.setItem( "currentItem", 1 );
+            pageNum.innerText = 1;
+
+        }
+
+        function goToEnding() {
+
+            image.setAttribute( "src", JSON.parse( localStorage.getItem( localStorage.length - 2 ) ).url )
+            pageNum.innerText = localStorage.length - 1;
+            localStorage.setItem( "currentItem", localStorage.length - 2 );
+
+        }
+
+        function goToPrev() {
+            
+            if( parseInt(localStorage.getItem( "currentItem" )) <= 1 ) {
+                alert( "You are already at the first page." );
+            } else {
+                let currentItem = parseInt(localStorage.getItem( "currentItem" ) ) - 1;
+                localStorage.setItem( "currentItem", currentItem );
+                image.setAttribute( "src", JSON.parse(localStorage.getItem( currentItem )).url );
+                pageNum.innerText = currentItem;
+            }
+
+        }
+
+        function goToNext() {
+
+            if( parseInt(localStorage.getItem( "currentItem" )) == (localStorage.length - 2) ) {
+                alert( "You are already at the last page." );
+            } else {
+                let currentItem = parseInt(localStorage.getItem( "currentItem" ) ) + 1;
+                localStorage.setItem( "currentItem", currentItem );
+                image.setAttribute( "src", JSON.parse(localStorage.getItem( currentItem )).url );
+                pageNum.innerText = currentItem;
+            }            
+
+        }
+
+    </script>
+    <!-- END JAVASCRIPT -->
+
+</body>
+</html>
